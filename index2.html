@@ -1,0 +1,62 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link type="text/css" rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap.css">
+<link type="text/css" rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css">
+<script type="text/javascript" src="http://twitter.github.com/bootstrap/assets/js/bootstrap.js"></script>
+
+<script type="text/javascript" src="https://platform.linkedin.com/in.js">
+  api_key: 2vnyj5sba67s
+  onLoad: onLinkedInLoad
+  scope: r_basicprofile r_emailaddress r_network
+  authorize:false
+</script>
+</head>
+
+<body>
+<script type="text/javascript">
+function onLinkedInLoad() {
+  IN.Event.on(IN, "auth", function() {onLinkedInLogin();});
+  IN.Event.on(IN, "logout", function() {onLinkedInLogout();});
+}
+
+function onLinkedInLogout() {
+  setConnections({}, {total:0});
+}
+
+function onLinkedInLogin() {
+  // here, we pass the fields as individual string parameters
+  IN.API.Profile("me").result(greetYou);
+  IN.API.Connections("me")
+    .fields("id", "firstName", "lastName", "pictureUrl", "publicProfileUrl")
+    .result(function(result, metadata) {
+      setConnections(result.values, metadata);
+    });
+}
+
+function setConnections(connections) {
+  var numCons = connections.length;
+  var connHTML = "<p>"+numCons+"</p>";
+  document.getElementById("connectionsdata").innerHTML = connHTML;
+}
+
+function greetYou(profiles) {
+  member=profiles.values[0];
+  youHTML = "<p> Hello "+member.firstName+" " +member.lastName+"</p><p> You are currently "+member.headline+"</p>";
+  document.getElementById("greetYou").innerHTML = youHTML;
+};
+
+</script>
+
+<script type="IN/Login">
+<div id="greetYou"></div>
+  <p># of your connections:</p>
+<div id="connectionsdata"></div>
+<br>Top 3 industries for your network are ...
+<br>Top 3 schools for your network are ...
+<br>Your network has been on average recommended xx times per member
+<br>Your network speaks following languages: English (xx), Russian (xx),...
+<br>xx% of your network indicated their age. The oldest member is xx (xx year old), the youngest member is xx (xx years old)
+</script>
+</body>
+
