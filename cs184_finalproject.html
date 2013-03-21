@@ -1,0 +1,228 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link type="text/css" rel="stylesheet" href="bootstrap.css">
+<link type="text/css" rel="stylesheet" href="bootstrap-responsive.css">
+
+<style type="text/css">
+   body {
+        padding-top: 0px;
+        padding-bottom: 0px;
+	margin:0;
+      }
+
+   strong {
+	color: #151B8D;
+	}
+
+      /* Custom container */
+      .container-narrow {
+        padding-top: 0px;
+        padding-bottom: 0px;
+        margin: 0 auto;
+        max-width: 700px;
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      /* Main message */
+      .jumbotron {
+        padding-top: 0px;
+        padding-bottom: 0px;
+        margin: 0px;
+        text-align: left;
+        vertical-align: middle
+
+</style>
+
+<script type="text/javascript" src="bootstrap.js"></script>
+
+<script type="text/javascript" src="https://platform.linkedin.com/in.js">
+  api_key: 2vnyj5sba67s
+  onLoad: onLinkedInLoad
+  scope: r_fullprofile r_emailaddress r_network
+  authorize:true
+</script>
+
+
+<script type="text/javascript">
+function onLinkedInLoad() {
+  IN.Event.on(IN, "auth", function() {onLinkedInLogin();});
+  IN.Event.on(IN, "logout", function() {onLinkedInLogout();});
+}
+
+function onLinkedInLogout() {
+  setConnections({}, {total:0});
+}
+
+function onLinkedInLogin() {
+
+  IN.API.Profile("me")
+    .fields("firstName","lastName","headline","educations","picture-url")
+    .result(greetYou)
+  ;
+  
+  IN.API.Connections("me")
+    .fields("id", "firstName", "lastName", "industry")
+    .result(function(result, metadata) {
+      setConnections(result.values, metadata);
+    });
+
+  document.getElementById("greeting").innerHTML = "<h2>Your profile:</h2>";
+
+
+};
+
+</script>
+</head>
+
+<body>
+
+<div class="container-narrow">
+
+	<div class="row-fluid jumbotron">
+	<div class="span6 text-left">
+		<script type="IN/Login">Logged in</script>
+	</div>
+	<div class="span6 text-right" id="logoutbutton">
+		<p></p>
+	</div>
+	</div>
+	<hr>
+	<div class="row-fluid jumbotron">
+		<div class="span12" id="greeting">
+			<h2>Welcome to Irina's CS184 project!</h2>
+			<h5>Log in with your LinkedIn account, and we will calculate the stats as shown below</h5>
+		</div>
+	</div>
+
+	<div class="row-fluid jumbotron">
+		<div class="span2" id="profilepic">
+		<img align="baseline" src="http://static02.linkedin.com/scds/common/u/img/icon/icon_no_photo_80x80.png">
+		</div>
+		<div class="offset1 span9">
+			<p id="greetYou">Your name and school</p>
+			<p id="connectionsdata"># of your connections</p>
+		</div>
+	</div>	
+<hr>
+	<div class="row-fluid">
+		<div class="span4">
+			<p id="industrydata">Top 5 industries for your network are...</p>
+		</div>
+		<div class="span4">
+			<p id="firstdata">Top 5 first names for your network are ...</p>
+		</div>
+		<div class="span4">
+		<p id="lastdata">Top 5 last names for your network are...</p>
+		</div>
+	
+	</div>
+<hr>
+      <div class="footer" style="text-align:right;">
+		&copy; 2013 Irina Malkova 
+<a href="http://www.irinamalkova.com">irinamalkova.com</a>
+			
+      </div>
+
+
+</div>
+
+
+
+<script>
+function setConnections(connections) {
+
+
+  var nameCounts = { };
+  var lastCounts = { };
+  var indCounts = { };
+
+  for( var i = 0; i < connections.length; i++) {
+  nameCounts[connections[i].firstName] = (nameCounts[connections[i].firstName] || 0) + 1;
+  lastCounts[connections[i].lastName] = (lastCounts[connections[i].lastName] || 0) + 1;
+  indCounts[connections[i].industry] = (indCounts[connections[i].industry] || 0) + 1;
+
+  };
+
+  var sort_name = [];
+  var sort_last = [];
+  var sort_ind = [];
+  
+  
+  for (var key in nameCounts) { sort_name.push({key:key,value:nameCounts[key]});  }
+  for (var key in lastCounts) { sort_last.push({key:key,value:lastCounts[key]});  }
+  for (var key in indCounts) { sort_ind.push({key:key,value:indCounts[key]});  }
+
+  sort_name.sort(function(x,y){return y.value - x.value});
+  sort_last.sort(function(x,y){return y.value - x.value});
+  sort_ind.sort(function(x,y){return y.value - x.value});
+
+
+  var firstHTML = "<h5>Top 5 first names of your network:</h5> <br><ol>";
+  var lastHTML = "<h5>Top 5 last names of your network:</h5> <br><ol>";
+  var indHTML = "<h5>Top 5 industries of your network:</h5> <br><ol>";
+
+  for (var i=0;i<5;i++) {
+    firstHTML += "<li> "+ sort_name[i].key+" - "+"<strong class=str"+(i+2)+">"+nameCounts[sort_name[i].key]+"</strong>"+" occurences</li>";
+    lastHTML += "<li> "+ sort_last[i].key+" - "+"<strong class=str"+(i+2)+">"+lastCounts[sort_last[i].key]+"</strong>"+" occurences</li>";
+    indHTML += "<li> "+ sort_ind[i].key+" - "+"<strong class=str"+(i+2)+">"+indCounts[sort_ind[i].key]+"</strong>"+" occurences</li>";
+  }
+
+
+  firstHTML += "</ol>";
+  lastHTML += "</ol>";
+  indHTML += "</ol>";
+  document.getElementById("firstdata").innerHTML = firstHTML;
+  document.getElementById("lastdata").innerHTML = lastHTML;
+  document.getElementById("industrydata").innerHTML = indHTML;
+
+  var numCons = connections.length;
+  var connHTML = "<p> # of your connections: <strong>"+numCons+"</strong></p>";
+  document.getElementById("connectionsdata").innerHTML = connHTML;
+};
+
+function greetYou(profiles) {
+  var member = profiles.values[0];
+
+  var imgHTML = " ";
+  if (member.hasOwnProperty('pictureUrl')) {
+      imgHTML = imgHTML + "<img class=img-polaroid align=\"baseline\" src=\"" + member.pictureUrl + "\"></a>";
+    }  else {
+      imgHTML = imgHTML + "<img align=\"baseline\" src=\"http://static02.linkedin.com/scds/common/u/img/icon/icon_no_photo_80x80.png\"></a>";
+    };
+  document.getElementById("profilepic").innerHTML = imgHTML;
+
+
+
+
+  var youHTML = "<p> Hello <strong>"+member.firstName+"</strong><br>";
+  youHTML += "Your most recent school is <strong>"+member.educations.values[0].schoolName+"</strong></p>";
+  document.getElementById("greetYou").innerHTML = youHTML;
+  if(document.getElementById("logoutbutton").innerHTML = "<p></p>") {
+	document.getElementById("logoutbutton").innerHTML = "<button class=btn-link onClick=onLogOut()>Logout</button>";
+
+  };
+
+};
+
+function onLogOut() {
+
+  IN.User.logout();
+  document.getElementById("greeting").innerHTML = "<h2>Thanks for using us!</h2>";
+  document.getElementById("greetYou").innerHTML = "<p></p>";
+  document.getElementById("connectionsdata").innerHTML = "<p></p>";
+  document.getElementById("firstdata").innerHTML = "<p></p>";
+  document.getElementById("lastdata").innerHTML ="<p></p>";
+  document.getElementById("industrydata").innerHTML = "<p></p>";
+  document.getElementById("logoutbutton").innerHTML = "<p></p>";
+  document.getElementById("profilepic").innerHTML = "<p></p>";
+
+
+};
+
+</script>    
+
+</body>
+
